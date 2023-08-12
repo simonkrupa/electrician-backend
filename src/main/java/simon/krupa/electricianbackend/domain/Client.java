@@ -3,15 +3,19 @@ package simon.krupa.electricianbackend.domain;
 import javax.persistence.*;
 
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
 @NoArgsConstructor
 @Table(name = "client")
@@ -28,6 +32,9 @@ public class Client implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = false)
+    private List<Job> jobs = new ArrayList<>();
 
     public Client(String firstName, String lastName, String email, String password, String phoneNumber, Role role){
         this.firstName = firstName;

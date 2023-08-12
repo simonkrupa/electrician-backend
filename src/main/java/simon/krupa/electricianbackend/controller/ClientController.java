@@ -45,7 +45,7 @@ public class ClientController {
     }
 
     @PostMapping(path = "/authenticate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ClientAuthenticationDTO> create(@RequestBody ClientAuthenticationRequest body) {
+    public ResponseEntity<ClientAuthenticationDTO> authenticate(@RequestBody ClientAuthenticationRequest body) {
         return new ResponseEntity<>(clientService.authenticateClient(body), HttpStatus.OK);
     }
 }
