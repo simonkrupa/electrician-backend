@@ -7,7 +7,6 @@ public record ClientRegistrationRequest (
         String lastName,
         String email,
         String phoneNumber,
-        String password,
-        Role role
+        String password
 ){
 }
