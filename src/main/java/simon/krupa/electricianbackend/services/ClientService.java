@@ -83,4 +83,21 @@ public class ClientService {
         return new ClientAuthenticationDTO(jwtToken);
     }
 
+    public ClientRegistrationDTO createAdmin(ClientRegistrationRequest body) {
+        if(!this.clientRepository.isEmailUsed(body.email()).isPresent()) {
+            Client client = new Client(
+                    body.firstName(),
+                    body.lastName(),
+                    body.email(),
+                    passwordEncoder.encode(body.password()),
+                    body.phoneNumber(),
+                    Role.ADMIN);
+            clientRepository.save(client);
+            var jwtToken = jwtService.generateToken(client);
+            return new ClientRegistrationDTO(client.getId(), client.getFirstName(), client.getLastName(),
+                    client.getEmail(), client.getPhoneNumber(), jwtToken);
+        } else {
+            throw new ConflictException("email [%s] already registered".formatted(body.email()));
+        }
+    }
 }

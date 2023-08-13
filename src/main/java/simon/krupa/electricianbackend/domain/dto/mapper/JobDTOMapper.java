@@ -1,6 +1,7 @@
 package simon.krupa.electricianbackend.domain.dto.mapper;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import simon.krupa.electricianbackend.domain.Job;
 import simon.krupa.electricianbackend.domain.dto.ClientDTO;
@@ -13,6 +14,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class JobDTOMapper implements Function<Job, JobDTO> {
 
+    @Autowired
     private ClientDTOMapper clientDTOMapper;
     @Override
     public JobDTO apply(Job job) {

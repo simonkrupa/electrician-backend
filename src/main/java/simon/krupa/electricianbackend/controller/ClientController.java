@@ -40,12 +40,17 @@ public class ClientController {
     }
 
     @PostMapping(path = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ClientRegistrationDTO> create(@RequestBody ClientRegistrationRequest body) {
-        return new ResponseEntity<>(clientService.createClient(body), HttpStatus.CREATED);
+    public ResponseEntity<ClientRegistrationDTO> create(@RequestBody ClientRegistrationRequest request) {
+        return new ResponseEntity<>(clientService.createClient(request), HttpStatus.CREATED);
     }
 
     @PostMapping(path = "/authenticate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ClientAuthenticationDTO> authenticate(@RequestBody ClientAuthenticationRequest body) {
-        return new ResponseEntity<>(clientService.authenticateClient(body), HttpStatus.OK);
+    public ResponseEntity<ClientAuthenticationDTO> authenticate(@RequestBody ClientAuthenticationRequest request) {
+        return new ResponseEntity<>(clientService.authenticateClient(request), HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/register/admin", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ClientRegistrationDTO> createAdmin(@RequestBody ClientRegistrationRequest request) {
+        return new ResponseEntity<>(clientService.createAdmin(request), HttpStatus.CREATED);
     }
 }

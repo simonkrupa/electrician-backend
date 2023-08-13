@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import simon.krupa.electricianbackend.domain.Client;
@@ -33,8 +34,13 @@ public class JobController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<JobDTONoClient>> getAll(){
+    public ResponseEntity<List<JobDTO>> getAll() {
         return new ResponseEntity<>(jobService.getAll(), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<JobDTO> getById(@PathVariable("id") Long id) {
+        return new ResponseEntity<>(jobService.getById(id), HttpStatus.OK);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -42,6 +48,23 @@ public class JobController {
         String currentClient = getCurrentClient();
         if (currentClient != null) {
             return new ResponseEntity<>(jobService.createJobRequest(request, currentClient), HttpStatus.CREATED);
+        } else {
+            throw new ConflictException("conflict");
+        }
+    }
+
+    @GetMapping(path = "/requested", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<JobDTO>> getAllRequestedJobs() {
+        return new ResponseEntity<>(jobService.getAllRequestedJobs(), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/clients", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<JobDTO>> getAllUsersJobs() {
+        String currentClient = getCurrentClient();
+        if (currentClient != null) {
+            return new ResponseEntity<>(jobService.getAllUsersJobs(currentClient), HttpStatus.OK);
         } else {
             throw new ConflictException("conflict");
         }

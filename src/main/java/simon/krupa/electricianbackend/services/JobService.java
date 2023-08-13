@@ -13,6 +13,7 @@ import simon.krupa.electricianbackend.domain.dto.mapper.JobDTOMapper;
 import simon.krupa.electricianbackend.domain.dto.mapper.JobDTOMapperNoClient;
 import simon.krupa.electricianbackend.domain.request.JobRequest;
 import simon.krupa.electricianbackend.exception.ConflictException;
+import simon.krupa.electricianbackend.exception.ResourceNotFoundException;
 import simon.krupa.electricianbackend.repositories.ClientRepository;
 import simon.krupa.electricianbackend.repositories.JobRepository;
 
@@ -30,10 +31,10 @@ public class JobService {
     private final JobDTOMapper jobDTOMapper;
     private final JobDTOMapperNoClient jobDTONoClient;
     private final ClientDTOMapper clientDTOMapper;
-    public List<JobDTONoClient> getAll(){
+    public List<JobDTO> getAll(){
         return jobRepository.findAll()
                 .stream()
-                .map(jobDTONoClient)
+                .map(jobDTOMapper)
                 .collect(Collectors.toList());
     }
 
@@ -44,5 +45,27 @@ public class JobService {
         job.setClient(clientRepository.findByEmail(currentClient).orElseThrow(() -> new ConflictException("wrong email")));
         jobRepository.save(job);
         return new JobDTO(job.getId(), job.getTitle(), job.getDescription(), job.isFinished(), job.getPrice(), clientDTOMapper.apply(job.getClient()));
+    }
+
+    public List<JobDTO> getAllRequestedJobs() {
+        return jobRepository.getAllRequestedJobs()
+                .stream()
+                .map(jobDTOMapper)
+                .collect(Collectors.toList());
+    }
+
+    public JobDTO getById(Long id) {
+        try {
+            return jobDTOMapper.apply(jobRepository.getById(id));
+        } catch (Exception e){
+            throw new ResourceNotFoundException("no job with this id");
+        }
+    }
+
+    public List<JobDTO> getAllUsersJobs(String currentClient) {
+        return jobRepository.getUsersJobs(currentClient)
+                .stream()
+                .map(jobDTOMapper)
+                .collect(Collectors.toList());
     }
 }
