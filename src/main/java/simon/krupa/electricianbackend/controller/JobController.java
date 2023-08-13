@@ -69,4 +69,15 @@ public class JobController {
             throw new ConflictException("conflict");
         }
     }
+
+    @PostMapping(path = "/accept/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<JobDTO> acceptJobRequest(@PathVariable("id") Long id){
+        return new ResponseEntity<>(jobService.acceptJobRequest(id), HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/finish/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<JobDTO> finishJob(@PathVariable("id") Long id){
+        return new ResponseEntity<>(jobService.finishJob(id), HttpStatus.OK);
+    }
 }

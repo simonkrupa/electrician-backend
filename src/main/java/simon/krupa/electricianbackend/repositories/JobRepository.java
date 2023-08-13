@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface JobRepository extends JpaRepository<Job, Long > {
-    @Query("select j from Job j where j.finished = false ")
+    @Query("select j from Job j where j.status = 'REQUESTED' ")
     List<Job> getAllRequestedJobs();
 
     @Query("select j from Job j where j.client = (select c.id from Client c where c.email=:email)")

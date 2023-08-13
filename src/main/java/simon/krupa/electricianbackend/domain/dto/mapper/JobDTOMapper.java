@@ -22,7 +22,7 @@ public class JobDTOMapper implements Function<Job, JobDTO> {
                 job.getId(),
                 job.getTitle(),
                 job.getDescription(),
-                job.isFinished(),
+                job.getStatus(),
                 job.getPrice(),
                 clientDTOMapper.apply(job.getClient())
         );

@@ -5,6 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import simon.krupa.electricianbackend.domain.Client;
 import simon.krupa.electricianbackend.domain.Job;
+import simon.krupa.electricianbackend.domain.Status;
 import simon.krupa.electricianbackend.domain.dto.ClientRegistrationDTO;
 import simon.krupa.electricianbackend.domain.dto.JobDTO;
 import simon.krupa.electricianbackend.domain.dto.JobDTONoClient;
@@ -44,7 +45,7 @@ public class JobService {
         job.setDescription(request.description());
         job.setClient(clientRepository.findByEmail(currentClient).orElseThrow(() -> new ConflictException("wrong email")));
         jobRepository.save(job);
-        return new JobDTO(job.getId(), job.getTitle(), job.getDescription(), job.isFinished(), job.getPrice(), clientDTOMapper.apply(job.getClient()));
+        return new JobDTO(job.getId(), job.getTitle(), job.getDescription(), job.getStatus(), job.getPrice(), clientDTOMapper.apply(job.getClient()));
     }
 
     public List<JobDTO> getAllRequestedJobs() {
@@ -67,5 +68,32 @@ public class JobService {
                 .stream()
                 .map(jobDTOMapper)
                 .collect(Collectors.toList());
+    }
+
+
+    public JobDTO acceptJobRequest(Long id) {
+        try {
+            Job job = jobRepository.getById(id);
+            if (job.getStatus() == Status.REQUESTED) {
+                job.setStatus(Status.ACCEPTED);
+                return jobDTOMapper.apply(jobRepository.save(job));
+            }
+            return null;
+        } catch (Exception e){
+            throw new ResourceNotFoundException("wrong");
+        }
+    }
+
+    public JobDTO finishJob(Long id) {
+        try {
+            Job job = jobRepository.getById(id);
+            if (job.getStatus() == Status.ACCEPTED) {
+                job.setStatus(Status.FINISHED);
+                return jobDTOMapper.apply(jobRepository.save(job));
+            }
+            return null;
+        } catch (Exception e){
+            throw new ResourceNotFoundException("wrong");
+        }
     }
 }

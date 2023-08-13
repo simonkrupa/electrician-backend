@@ -18,7 +18,7 @@ public class JobDTOMapperNoClient implements Function<Job, JobDTONoClient> {
                 job.getId(),
                 job.getTitle(),
                 job.getDescription(),
-                job.isFinished(),
+                job.getStatus(),
                 job.getPrice()
         );
     }

@@ -18,8 +18,9 @@ public class Job {
 
     private String title;
     private String description;
-    private boolean finished = false;
     private BigDecimal price;
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.REQUESTED;
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
