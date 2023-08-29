@@ -5,6 +5,8 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -25,5 +27,8 @@ public class Job {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
     private Client client;
+
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, orphanRemoval = false)
+    private List<Review> reviews = new ArrayList<>();
 
 }

@@ -36,6 +36,9 @@ public class Client implements UserDetails {
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = false)
     private List<Job> jobs = new ArrayList<>();
 
+//    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = false)
+//    private List<Review> reviews = new ArrayList<>();
+
     public Client(String firstName, String lastName, String email, String password, String phoneNumber, Role role){
         this.firstName = firstName;
         this.lastName = lastName;

@@ -8,19 +8,15 @@ import simon.krupa.electricianbackend.domain.Job;
 import simon.krupa.electricianbackend.domain.Status;
 import simon.krupa.electricianbackend.domain.dto.ClientRegistrationDTO;
 import simon.krupa.electricianbackend.domain.dto.JobDTO;
-import simon.krupa.electricianbackend.domain.dto.JobDTONoClient;
 import simon.krupa.electricianbackend.domain.dto.mapper.ClientDTOMapper;
 import simon.krupa.electricianbackend.domain.dto.mapper.JobDTOMapper;
-import simon.krupa.electricianbackend.domain.dto.mapper.JobDTOMapperNoClient;
 import simon.krupa.electricianbackend.domain.request.JobRequest;
 import simon.krupa.electricianbackend.exception.ConflictException;
 import simon.krupa.electricianbackend.exception.ResourceNotFoundException;
 import simon.krupa.electricianbackend.repositories.ClientRepository;
 import simon.krupa.electricianbackend.repositories.JobRepository;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,7 +26,6 @@ public class JobService {
     private final JobRepository jobRepository;
     private final ClientRepository clientRepository;
     private final JobDTOMapper jobDTOMapper;
-    private final JobDTOMapperNoClient jobDTONoClient;
     private final ClientDTOMapper clientDTOMapper;
     public List<JobDTO> getAll(){
         return jobRepository.findAll()
