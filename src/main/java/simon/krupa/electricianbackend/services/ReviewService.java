@@ -60,4 +60,28 @@ public class ReviewService {
             throw new ConflictException("Conflict, not owner of job request");
         }
     }
+
+    public ReviewDTO updateReview(Long id, ReviewRequest request, String currentClient) {
+        Job job = jobRepository.getById(request.jobId());
+        if (job.getClient().getEmail().equals(currentClient)) {
+            if (reviewRepository.existsById(id)) {
+                Review review = reviewRepository.getById(id);
+                try {
+                    if (request.description() != null) {
+                        review.setDescription(request.description());
+                    }
+                    if (request.stars() != null) {
+                        review.setStars(request.stars());
+                    }
+                    return reviewDTOMapper.apply(this.reviewRepository.save(review));
+                } catch (Exception e) {
+                    throw new ConflictException("Conflict");
+                }
+            }
+        } else {
+            throw new ConflictException("not same client");
+        }
+        throw new ResourceNotFoundException("no review with this id");
+    }
+
 }

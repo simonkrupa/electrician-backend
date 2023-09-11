@@ -53,4 +53,15 @@ public class ReviewController {
             throw new ConflictException("conflict");
         }
     }
+
+    @PutMapping(path = "{id}",consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ReviewDTO> update(@PathVariable Long id, @RequestBody ReviewRequest request){
+        String currentClient = getCurrentClient();
+        if (currentClient != null) {
+            return new ResponseEntity<>(reviewService.updateReview(id, request, currentClient), HttpStatus.OK);
+        } else {
+            throw new ConflictException("conflict");
+        }
+    }
+
 }
