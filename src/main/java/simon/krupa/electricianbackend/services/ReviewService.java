@@ -2,10 +2,14 @@ package simon.krupa.electricianbackend.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import simon.krupa.electricianbackend.domain.Job;
 import simon.krupa.electricianbackend.domain.Review;
 import simon.krupa.electricianbackend.domain.dto.ReviewDTO;
 import simon.krupa.electricianbackend.domain.dto.mapper.ReviewDTOMapper;
+import simon.krupa.electricianbackend.domain.request.ReviewRequest;
+import simon.krupa.electricianbackend.exception.ConflictException;
 import simon.krupa.electricianbackend.exception.ResourceNotFoundException;
+import simon.krupa.electricianbackend.repositories.JobRepository;
 import simon.krupa.electricianbackend.repositories.ReviewRepository;
 
 import java.util.List;
@@ -17,6 +21,7 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final ReviewDTOMapper reviewDTOMapper;
+    private final JobRepository jobRepository;
 
     public List<ReviewDTO> getAll(){
         return reviewRepository.findAll()
@@ -41,5 +46,18 @@ public class ReviewService {
             throw new ResourceNotFoundException("no review with this id");
         }
         return null;
+    }
+
+    public ReviewDTO createReview(ReviewRequest request, String currentClient) {
+        Job job = jobRepository.getById(request.jobId());
+        if (job.getClient().getEmail().equals(currentClient)) {
+            Review review = new Review();
+            review.setStars(request.stars());
+            review.setDescription(request.description());
+            review.setJob(job);
+            return reviewDTOMapper.apply(reviewRepository.save(review));
+        } else {
+            throw new ConflictException("Conflict, not owner of job request");
+        }
     }
 }
