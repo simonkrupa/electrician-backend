@@ -91,4 +91,41 @@ public class JobService {
             throw new ResourceNotFoundException("wrong");
         }
     }
+
+    public Void deleteJobRequest(Long id, String currentClient) {
+        Job job = jobRepository.getById(id);
+        if (currentClient.equals(job.getClient().getEmail())){
+            if(job.getStatus() == Status.REQUESTED){
+                jobRepository.delete(job);
+                return null;
+            } else if (job.getStatus()==Status.ACCEPTED) {
+                //TODO send notification to approve
+                return null;
+            }
+        } else {
+            throw new ConflictException("conflict client");
+        }
+        return null;
+    }
+
+    public JobDTO update(Long id, JobRequest request, String currentClient) {
+        Job job = jobRepository.getById(id);
+        if(job.getClient().getEmail().equals(currentClient)){
+            if (job.getStatus() == Status.REQUESTED) {
+                if (request.description() != null) {
+                    job.setDescription(request.description());
+                }
+                if (request.title() != null) {
+                    job.setTitle(request.title());
+                }
+                return jobDTOMapper.apply(jobRepository.save(job));
+            } else if (job.getStatus() == Status.ACCEPTED) {
+                //TODO
+                return null;
+            }
+        } else {
+            throw new ConflictException("conflict");
+        }
+        return null;
+    }
 }

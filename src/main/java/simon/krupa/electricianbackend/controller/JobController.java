@@ -77,4 +77,19 @@ public class JobController {
     public ResponseEntity<JobDTO> finishJob(@PathVariable("id") Long id){
         return new ResponseEntity<>(jobService.finishJob(id), HttpStatus.OK);
     }
+
+    @DeleteMapping(path = "{id}")
+    public ResponseEntity<Void> deleteJobRequest(@PathVariable("id") Long id){
+        return new ResponseEntity<>(jobService.deleteJobRequest(id, getCurrentClient()), HttpStatus.OK);
+    }
+
+    @PutMapping(path = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<JobDTO> updateJob(@PathVariable Long id, @RequestBody JobRequest request){
+        String currentClient = getCurrentClient();
+        if (currentClient != null) {
+            return new ResponseEntity<>(jobService.update(id, request, currentClient), HttpStatus.OK);
+        } else {
+            throw new ConflictException("conflict");
+        }
+    }
 }
