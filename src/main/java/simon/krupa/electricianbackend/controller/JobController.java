@@ -7,15 +7,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import simon.krupa.electricianbackend.domain.Client;
 import simon.krupa.electricianbackend.domain.dto.JobDTO;
-import simon.krupa.electricianbackend.domain.dto.JobDTONoClient;
 import simon.krupa.electricianbackend.domain.request.JobRequest;
 import simon.krupa.electricianbackend.exception.ConflictException;
 import simon.krupa.electricianbackend.services.JobService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/job")

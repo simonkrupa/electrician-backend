@@ -2,6 +2,7 @@ package simon.krupa.electricianbackend.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import simon.krupa.electricianbackend.domain.Review;
 import simon.krupa.electricianbackend.domain.dto.ReviewDTO;
 import simon.krupa.electricianbackend.domain.dto.mapper.ReviewDTOMapper;
 import simon.krupa.electricianbackend.exception.ResourceNotFoundException;
@@ -30,5 +31,15 @@ public class ReviewService {
         } catch (Exception e) {
             throw new ResourceNotFoundException("no review with this id");
         }
+    }
+
+    public Void delete(Long id) {
+        Review review = reviewRepository.getById(id);
+        if (review != null){
+            reviewRepository.delete(review);
+        } else {
+            throw new ResourceNotFoundException("no review with this id");
+        }
+        return null;
     }
 }

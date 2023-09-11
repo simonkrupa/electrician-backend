@@ -11,7 +11,7 @@ import simon.krupa.electricianbackend.domain.dto.ClientDTO;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/public")
+@RequestMapping("/api/home")
 public class WelcomeController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)

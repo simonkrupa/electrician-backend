@@ -21,6 +21,7 @@ public class Job {
     private String title;
     private String description;
     private BigDecimal price;
+    private Boolean visibility;
     @Enumerated(EnumType.STRING)
     private Status status = Status.REQUESTED;
     @JsonIgnore
