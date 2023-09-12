@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -25,10 +26,18 @@ public class SecurityConfiguration {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .antMatchers(HttpMethod.GET,"/api/public/**")
+                .antMatchers(HttpMethod.GET,"/api/home/**")
                 .permitAll()
-                .antMatchers(HttpMethod.POST, "/api/client/**")
+                .antMatchers(HttpMethod.GET, "/api/reviews/**")
                 .permitAll()
+                .antMatchers(HttpMethod.POST, "/api/reviews/**")
+                .hasAuthority("USER")
+                .antMatchers(HttpMethod.DELETE, "/api/reviews/**")
+                .hasAuthority("USER")
+                .antMatchers(HttpMethod.PUT, "/api/reviews/**")
+                .hasAuthority("USER")
+                .antMatchers(HttpMethod.GET, "/api/jobs/requested")
+                .hasAnyAuthority("ADMIN")
                 .anyRequest()
                 .authenticated()
                 .and()
