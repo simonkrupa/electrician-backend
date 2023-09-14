@@ -32,16 +32,19 @@ public class JobController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<JobDTO>> getAll() {
         return new ResponseEntity<>(jobService.getAll(), HttpStatus.OK);
     }
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<JobDTO> getById(@PathVariable("id") Long id) {
         return new ResponseEntity<>(jobService.getById(id), HttpStatus.OK);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<JobDTO> createJobRequest(@RequestBody JobRequest request) {
         String currentClient = getCurrentClient();
         if (currentClient != null) {
@@ -75,16 +78,19 @@ public class JobController {
     }
 
     @PostMapping(path = "/finish/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<JobDTO> finishJob(@PathVariable("id") Long id){
         return new ResponseEntity<>(jobService.finishJob(id), HttpStatus.OK);
     }
 
     @DeleteMapping(path = "{id}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> deleteJobRequest(@PathVariable("id") Long id){
         return new ResponseEntity<>(jobService.deleteJobRequest(id, getCurrentClient()), HttpStatus.OK);
     }
 
     @PutMapping(path = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<JobDTO> updateJob(@PathVariable Long id, @RequestBody JobRequest request){
         String currentClient = getCurrentClient();
         if (currentClient != null) {

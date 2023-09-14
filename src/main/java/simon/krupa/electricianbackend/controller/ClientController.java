@@ -3,6 +3,7 @@ package simon.krupa.electricianbackend.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import simon.krupa.electricianbackend.domain.dto.ClientDTO;
 import simon.krupa.electricianbackend.domain.request.ClientAuthenticationRequest;
@@ -34,6 +35,7 @@ public class ClientController {
     }
 
     @DeleteMapping(path = "/{id}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         this.clientService.deleteClient(id);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
@@ -49,8 +51,10 @@ public class ClientController {
         return new ResponseEntity<>(clientService.authenticateClient(request), HttpStatus.OK);
     }
 
-    @PostMapping(path = "/register/admin", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ClientRegistrationDTO> createAdmin(@RequestBody ClientRegistrationRequest request) {
-        return new ResponseEntity<>(clientService.createAdmin(request), HttpStatus.CREATED);
-    }
+//    @PostMapping(path = "/register/admin", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<ClientRegistrationDTO> createAdmin(@RequestBody ClientRegistrationRequest request) {
+//        return new ResponseEntity<>(clientService.createAdmin(request), HttpStatus.CREATED);
+//    }
+
+    //TODO put
 }

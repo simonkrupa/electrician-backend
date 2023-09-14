@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import simon.krupa.electricianbackend.domain.dto.ReviewDTO;
@@ -40,11 +41,13 @@ public class ReviewController {
     }
 
     @DeleteMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> delete(@PathVariable Long id){
         return new ResponseEntity<>(reviewService.delete(id), HttpStatus.ACCEPTED);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReviewDTO> create(@RequestBody ReviewRequest request){
         String currentClient = getCurrentClient();
         if (currentClient != null) {
@@ -55,6 +58,7 @@ public class ReviewController {
     }
 
     @PutMapping(path = "{id}",consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReviewDTO> update(@PathVariable Long id, @RequestBody ReviewRequest request){
         String currentClient = getCurrentClient();
         if (currentClient != null) {
