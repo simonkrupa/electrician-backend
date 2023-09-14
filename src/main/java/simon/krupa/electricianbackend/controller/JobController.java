@@ -6,7 +6,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import simon.krupa.electricianbackend.domain.dto.JobDTO;
 import simon.krupa.electricianbackend.domain.request.JobRequest;
@@ -22,15 +24,6 @@ public class JobController {
 
     private final JobService jobService;
 
-    private String getCurrentClient() {
-        String login =
-                SecurityContextHolder.getContext().getAuthentication().getName();
-        if (login != null && !login.equals("anonymousUser")) {
-            return login;
-        }
-        return null;
-    }
-
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<JobDTO>> getAll() {
@@ -45,13 +38,8 @@ public class JobController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<JobDTO> createJobRequest(@RequestBody JobRequest request) {
-        String currentClient = getCurrentClient();
-        if (currentClient != null) {
-            return new ResponseEntity<>(jobService.createJobRequest(request, currentClient), HttpStatus.CREATED);
-        } else {
-            throw new ConflictException("conflict");
-        }
+    public ResponseEntity<JobDTO> createJobRequest(@RequestBody JobRequest request, @AuthenticationPrincipal UserDetails userDetails) {
+        return new ResponseEntity<>(jobService.createJobRequest(request, userDetails.getUsername()), HttpStatus.CREATED);
     }
 
     @GetMapping(path = "/requested", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -62,13 +50,8 @@ public class JobController {
 
     @GetMapping(path = "/clients", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<JobDTO>> getAllUsersJobs() {
-        String currentClient = getCurrentClient();
-        if (currentClient != null) {
-            return new ResponseEntity<>(jobService.getAllUsersJobs(currentClient), HttpStatus.OK);
-        } else {
-            throw new ConflictException("conflict");
-        }
+    public ResponseEntity<List<JobDTO>> getAllUsersJobs(@AuthenticationPrincipal UserDetails userDetails) {
+        return new ResponseEntity<>(jobService.getAllUsersJobs(userDetails.getUsername()), HttpStatus.OK);
     }
 
     @PostMapping(path = "/accept/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -85,18 +68,13 @@ public class JobController {
 
     @DeleteMapping(path = "{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> deleteJobRequest(@PathVariable("id") Long id){
-        return new ResponseEntity<>(jobService.deleteJobRequest(id, getCurrentClient()), HttpStatus.OK);
+    public ResponseEntity<Void> deleteJobRequest(@PathVariable("id") Long id, @AuthenticationPrincipal UserDetails userDetails){
+        return new ResponseEntity<>(jobService.deleteJobRequest(id, userDetails.getUsername()), HttpStatus.OK);
     }
 
     @PutMapping(path = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<JobDTO> updateJob(@PathVariable Long id, @RequestBody JobRequest request){
-        String currentClient = getCurrentClient();
-        if (currentClient != null) {
-            return new ResponseEntity<>(jobService.update(id, request, currentClient), HttpStatus.OK);
-        } else {
-            throw new ConflictException("conflict");
-        }
+    public ResponseEntity<JobDTO> updateJob(@PathVariable Long id, @RequestBody JobRequest request, @AuthenticationPrincipal UserDetails userDetails){
+        return new ResponseEntity<>(jobService.update(id, request, userDetails.getUsername()), HttpStatus.OK);
     }
 }

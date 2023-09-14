@@ -5,7 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import simon.krupa.electricianbackend.domain.dto.ReviewDTO;
 import simon.krupa.electricianbackend.domain.request.ReviewRequest;
@@ -19,15 +21,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class ReviewController {
-
-    private String getCurrentClient() {
-        String login =
-                SecurityContextHolder.getContext().getAuthentication().getName();
-        if (login != null && !login.equals("anonymousUser")) {
-            return login;
-        }
-        return null;
-    }
     private final ReviewService reviewService;
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -48,24 +41,14 @@ public class ReviewController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ReviewDTO> create(@RequestBody ReviewRequest request){
-        String currentClient = getCurrentClient();
-        if (currentClient != null) {
-            return new ResponseEntity<>(reviewService.createReview(request, currentClient), HttpStatus.CREATED);
-        } else {
-            throw new ConflictException("conflict");
-        }
+    public ResponseEntity<ReviewDTO> create(@RequestBody ReviewRequest request, @AuthenticationPrincipal UserDetails userDetails){
+         return new ResponseEntity<>(reviewService.createReview(request, userDetails.getUsername()), HttpStatus.CREATED);
     }
 
     @PutMapping(path = "{id}",consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ReviewDTO> update(@PathVariable Long id, @RequestBody ReviewRequest request){
-        String currentClient = getCurrentClient();
-        if (currentClient != null) {
-            return new ResponseEntity<>(reviewService.updateReview(id, request, currentClient), HttpStatus.OK);
-        } else {
-            throw new ConflictException("conflict");
-        }
+    public ResponseEntity<ReviewDTO> update(@PathVariable Long id, @RequestBody ReviewRequest request, @AuthenticationPrincipal UserDetails userDetails){
+        return new ResponseEntity<>(reviewService.updateReview(id, request, userDetails.getUsername()), HttpStatus.OK);
     }
 
 }
