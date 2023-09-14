@@ -60,7 +60,7 @@ public class ClientService {
                     body.email(),
                     passwordEncoder.encode(body.password()),
                     body.phoneNumber(),
-                    Role.USER);
+                    Role.ROLE_USER);
             clientRepository.save(client);
             var jwtToken = jwtService.generateToken(client);
             return new ClientRegistrationDTO(client.getId(), client.getFirstName(), client.getLastName(),
@@ -91,7 +91,7 @@ public class ClientService {
                     body.email(),
                     passwordEncoder.encode(body.password()),
                     body.phoneNumber(),
-                    Role.ADMIN);
+                    Role.ROLE_ADMIN);
             clientRepository.save(client);
             var jwtToken = jwtService.generateToken(client);
             return new ClientRegistrationDTO(client.getId(), client.getFirstName(), client.getLastName(),

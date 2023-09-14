@@ -17,6 +17,7 @@ import org.springframework.util.AntPathMatcher;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
@@ -26,18 +27,8 @@ public class SecurityConfiguration {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .antMatchers(HttpMethod.GET,"/api/home/**")
+                .antMatchers(HttpMethod.POST, "/api/client/**")
                 .permitAll()
-                .antMatchers(HttpMethod.GET, "/api/reviews/**")
-                .permitAll()
-                .antMatchers(HttpMethod.POST, "/api/reviews/**")
-                .hasAuthority("USER")
-                .antMatchers(HttpMethod.DELETE, "/api/reviews/**")
-                .hasAuthority("USER")
-                .antMatchers(HttpMethod.PUT, "/api/reviews/**")
-                .hasAuthority("USER")
-                .antMatchers(HttpMethod.GET, "/api/jobs/requested")
-                .hasAnyAuthority("ADMIN")
                 .anyRequest()
                 .authenticated()
                 .and()
