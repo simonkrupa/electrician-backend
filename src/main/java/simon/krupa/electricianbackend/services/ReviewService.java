@@ -7,6 +7,7 @@ import simon.krupa.electricianbackend.domain.Review;
 import simon.krupa.electricianbackend.domain.dto.ReviewDTO;
 import simon.krupa.electricianbackend.domain.dto.mapper.ReviewDTOMapper;
 import simon.krupa.electricianbackend.domain.request.ReviewRequest;
+import simon.krupa.electricianbackend.exception.BadRequestException;
 import simon.krupa.electricianbackend.exception.ConflictException;
 import simon.krupa.electricianbackend.exception.ResourceNotFoundException;
 import simon.krupa.electricianbackend.repositories.JobRepository;
@@ -34,52 +35,61 @@ public class ReviewService {
         try {
             return reviewDTOMapper.apply(reviewRepository.getById(id));
         } catch (Exception e) {
-            throw new ResourceNotFoundException("no review with this id");
+            throw new ResourceNotFoundException(String.format("no review with this %d", id));
         }
     }
 
     public void delete(Long id) {
         boolean exists = reviewRepository.existsById(id);
         if (!exists){
-            throw new ResourceNotFoundException("no review with this id");
+            throw new ResourceNotFoundException(String.format("no review with this %d", id));
         }
         reviewRepository.deleteById(id);
     }
 
     public ReviewDTO createReview(ReviewRequest request, String currentClient) {
-        Job job = jobRepository.getById(request.jobId());
-        if (job.getClient().getEmail().equals(currentClient)) {
-            Review review = new Review();
-            review.setStars(request.stars());
-            review.setDescription(request.description());
-            review.setJob(job);
-            return reviewDTOMapper.apply(reviewRepository.save(review));
-        } else {
-            throw new ConflictException("Conflict, not owner of job request");
+        try {
+            Job job = jobRepository.getById(request.jobId());
+            if (job.getClient().getEmail().equals(currentClient) && (request.stars() >= 0 && request.stars() <= 5)) {
+                Review review = new Review();
+                review.setStars(request.stars());
+                review.setDescription(request.description());
+                review.setJob(job);
+                return reviewDTOMapper.apply(reviewRepository.save(review));
+            } else {
+                throw new BadRequestException("Bad request");
+            }
+        } catch (Exception e){
+            throw new BadRequestException("Bad request");
         }
     }
 
     public ReviewDTO updateReview(Long id, ReviewRequest request, String currentClient) {
-        Job job = jobRepository.getById(request.jobId());
-        if (job.getClient().getEmail().equals(currentClient)) {
-            if (reviewRepository.existsById(id)) {
+        try {
+            Job job = jobRepository.getById(request.jobId());
+            if (job.getClient().getEmail().equals(currentClient) && reviewRepository.existsById(id)) {
                 Review review = reviewRepository.getById(id);
                 try {
                     if (request.description() != null) {
                         review.setDescription(request.description());
                     }
                     if (request.stars() != null) {
-                        review.setStars(request.stars());
+                        if (request.stars() >= 0 && request.stars() <= 5) {
+                            review.setStars(request.stars());
+                        } else {
+                            throw new BadRequestException("Bad request");
+                        }
                     }
                     return reviewDTOMapper.apply(this.reviewRepository.save(review));
                 } catch (Exception e) {
-                    throw new ConflictException("Conflict");
+                    throw new BadRequestException("Bad request");
                 }
+            } else {
+                throw new BadRequestException("Bad request");
             }
-        } else {
-            throw new ConflictException("not same client");
+        } catch (Exception e) {
+            throw new BadRequestException("Bad request");
         }
-        throw new ResourceNotFoundException("no review with this id");
     }
 
 }
