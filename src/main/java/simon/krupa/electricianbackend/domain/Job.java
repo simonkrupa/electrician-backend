@@ -18,10 +18,11 @@ public class Job {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(nullable = false)
     private String title;
+    @Column(nullable = false)
     private String description;
     private BigDecimal price;
-    private Boolean visibility;
     @Enumerated(EnumType.STRING)
     private Status status = Status.REQUESTED;
     @JsonIgnore

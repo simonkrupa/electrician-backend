@@ -2,10 +2,12 @@ package simon.krupa.electricianbackend.domain;
 
 import javax.persistence.*;
 
+import com.sun.istack.NotNull;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,9 +27,11 @@ public class Client implements UserDetails {
     private Long id;
     private String firstName;
     private String lastName;
-    @Column(unique=true)
+    @Column(unique=true, nullable = false)
     private String email;
+    @Column(nullable = false)
     private String password;
+    @Column(nullable = false)
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)

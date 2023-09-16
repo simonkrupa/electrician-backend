@@ -124,7 +124,11 @@ public class ClientService {
                 client.setLastName(request.lastName());
             }
             if (request.phoneNumber() != null){
-                client.setPhoneNumber(request.phoneNumber());
+                if (isValidPhoneNumber(request.phoneNumber())) {
+                    client.setPhoneNumber(request.phoneNumber());
+                } else {
+                    throw new ConflictException("Wrong number format");
+                }
             }
             return clientDTOMapper.apply(clientRepository.save(client));
         } else {
