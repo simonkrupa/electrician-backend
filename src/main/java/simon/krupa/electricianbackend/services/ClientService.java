@@ -3,6 +3,7 @@ package simon.krupa.electricianbackend.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import simon.krupa.electricianbackend.config.JwtService;
@@ -14,6 +15,7 @@ import simon.krupa.electricianbackend.domain.request.ClientAuthenticationRequest
 import simon.krupa.electricianbackend.domain.request.ClientRegistrationRequest;
 import simon.krupa.electricianbackend.domain.dto.ClientAuthenticationDTO;
 import simon.krupa.electricianbackend.domain.dto.ClientRegistrationDTO;
+import simon.krupa.electricianbackend.domain.request.ClientRequest;
 import simon.krupa.electricianbackend.exception.ConflictException;
 import simon.krupa.electricianbackend.exception.ResourceNotFoundException;
 import simon.krupa.electricianbackend.repositories.ClientRepository;
@@ -98,6 +100,27 @@ public class ClientService {
                     client.getEmail(), client.getPhoneNumber(), jwtToken);
         } else {
             throw new ConflictException("email [%s] already registered".formatted(body.email()));
+        }
+    }
+
+    public ClientDTO update(ClientRequest request, Long id, UserDetails currentUser) {
+        Client client = clientRepository.getById(id);
+        if(currentUser.getUsername().equals(client.getEmail())){
+            if (request.email() != null){
+                client.setEmail(request.email());
+            }
+            if (request.firstName() != null){
+                client.setFirstName(request.firstName());
+            }
+            if (request.lastName() != null){
+                client.setLastName(request.lastName());
+            }
+            if (request.phoneNumber() != null){
+                client.setPhoneNumber(request.phoneNumber());
+            }
+            return clientDTOMapper.apply(clientRepository.save(client));
+        } else {
+            throw new ResourceNotFoundException("No correct client");
         }
     }
 }

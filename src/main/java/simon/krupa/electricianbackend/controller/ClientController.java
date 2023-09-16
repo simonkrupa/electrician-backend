@@ -4,12 +4,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import simon.krupa.electricianbackend.domain.dto.ClientDTO;
 import simon.krupa.electricianbackend.domain.request.ClientAuthenticationRequest;
 import simon.krupa.electricianbackend.domain.request.ClientRegistrationRequest;
 import simon.krupa.electricianbackend.domain.dto.ClientAuthenticationDTO;
 import simon.krupa.electricianbackend.domain.dto.ClientRegistrationDTO;
+import simon.krupa.electricianbackend.domain.request.ClientRequest;
 import simon.krupa.electricianbackend.services.ClientService;
 
 import java.util.List;
@@ -56,5 +59,8 @@ public class ClientController {
 //        return new ResponseEntity<>(clientService.createAdmin(request), HttpStatus.CREATED);
 //    }
 
-    //TODO put
+    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ClientDTO> update(@RequestBody ClientRequest request, @PathVariable Long id, @AuthenticationPrincipal UserDetails currentUser){
+        return new ResponseEntity<>(clientService.update(request, id, currentUser), HttpStatus.ACCEPTED);
+    }
 }
