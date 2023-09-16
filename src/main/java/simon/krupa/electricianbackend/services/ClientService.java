@@ -21,6 +21,8 @@ import simon.krupa.electricianbackend.exception.ResourceNotFoundException;
 import simon.krupa.electricianbackend.repositories.ClientRepository;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +34,12 @@ public class ClientService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+
+    public boolean isValidPhoneNumber(String phoneNumber) {
+        Pattern regex = Pattern.compile("\\d{10}");
+        Matcher matcher = regex.matcher(phoneNumber);
+        return matcher.matches();
+    }
 
     public List<ClientDTO> getAllClients(){
         return clientRepository.findAll()
@@ -55,7 +63,7 @@ public class ClientService {
     }
 
     public ClientRegistrationDTO createClient(ClientRegistrationRequest body) {
-        if(!this.clientRepository.isEmailUsed(body.email()).isPresent()) {
+        if(!this.clientRepository.isEmailUsed(body.email()).isPresent() && isValidPhoneNumber(body.phoneNumber())) {
             Client client = new Client(
                     body.firstName(),
                     body.lastName(),
@@ -68,7 +76,7 @@ public class ClientService {
             return new ClientRegistrationDTO(client.getId(), client.getFirstName(), client.getLastName(),
                     client.getEmail(), client.getPhoneNumber(), jwtToken);
         } else {
-            throw new ConflictException("email [%s] already registered".formatted(body.email()));
+            throw new ConflictException("email [%s] already registered or phone number not in correct format".formatted(body.email()));
         }
     }
 

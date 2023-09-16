@@ -17,4 +17,7 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     @Query("select c from Client c where c.email=:email")
     Optional<Client> findByEmail(@Param("email") String email);
+
+    @Query("SELECT CASE WHEN COUNT(c) > 0 THEN TRUE ELSE FALSE END FROM Client c WHERE c.email = ?1")
+    Boolean selectExistsEmail(String email);
 }
