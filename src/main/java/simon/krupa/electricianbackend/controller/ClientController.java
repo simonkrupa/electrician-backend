@@ -41,7 +41,7 @@ public class ClientController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         this.clientService.deleteClient(id);
-        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping(path = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -61,6 +61,6 @@ public class ClientController {
 
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ClientDTO> update(@RequestBody ClientRequest request, @PathVariable Long id, @AuthenticationPrincipal UserDetails currentUser){
-        return new ResponseEntity<>(clientService.update(request, id, currentUser), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(clientService.update(request, id, currentUser), HttpStatus.OK);
     }
 }

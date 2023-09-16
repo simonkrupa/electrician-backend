@@ -36,7 +36,8 @@ public class ReviewController {
     @DeleteMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> delete(@PathVariable Long id){
-        return new ResponseEntity<>(reviewService.delete(id), HttpStatus.ACCEPTED);
+        reviewService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

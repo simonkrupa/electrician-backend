@@ -38,14 +38,12 @@ public class ReviewService {
         }
     }
 
-    public Void delete(Long id) {
-        Review review = reviewRepository.getById(id);
-        if (review != null){
-            reviewRepository.delete(review);
-        } else {
+    public void delete(Long id) {
+        boolean exists = reviewRepository.existsById(id);
+        if (!exists){
             throw new ResourceNotFoundException("no review with this id");
         }
-        return null;
+        reviewRepository.deleteById(id);
     }
 
     public ReviewDTO createReview(ReviewRequest request, String currentClient) {

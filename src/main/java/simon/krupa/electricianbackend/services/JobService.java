@@ -102,12 +102,11 @@ public class JobService {
         }
     }
 
-    public Void deleteJobRequest(Long id, String currentClient) {
+    public void deleteJobRequest(Long id, String currentClient) {
         Job job = jobRepository.getById(id);
         if (currentClient.equals(job.getClient().getEmail())){
             if(job.getStatus() == Status.REQUESTED){
                 jobRepository.delete(job);
-                return null;
             } else {
                 throw new ConflictException("job request cannot be deleted.");
             }

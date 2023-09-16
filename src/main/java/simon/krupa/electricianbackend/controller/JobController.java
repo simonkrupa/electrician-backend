@@ -54,13 +54,13 @@ public class JobController {
         return new ResponseEntity<>(jobService.getAllUsersJobs(userDetails.getUsername()), HttpStatus.OK);
     }
 
-    @PostMapping(path = "/accept/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = "/accept/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<JobDTO> acceptJobRequest(@PathVariable("id") Long id){
         return new ResponseEntity<>(jobService.acceptJobRequest(id), HttpStatus.OK);
     }
 
-    @PostMapping(path = "/finish/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = "/finish/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<JobDTO> finishJob(@PathVariable("id") Long id){
         return new ResponseEntity<>(jobService.finishJob(id), HttpStatus.OK);
@@ -69,7 +69,8 @@ public class JobController {
     @DeleteMapping(path = "{id}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> deleteJobRequest(@PathVariable("id") Long id, @AuthenticationPrincipal UserDetails userDetails){
-        return new ResponseEntity<>(jobService.deleteJobRequest(id, userDetails.getUsername()), HttpStatus.OK);
+        jobService.deleteJobRequest(id, userDetails.getUsername());
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping(path = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
