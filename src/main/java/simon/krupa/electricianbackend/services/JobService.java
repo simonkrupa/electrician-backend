@@ -27,6 +27,7 @@ public class JobService {
     private final ClientRepository clientRepository;
     private final JobDTOMapper jobDTOMapper;
     private final ClientDTOMapper clientDTOMapper;
+//    private final EmailSenderService emailSenderService;
     public List<JobDTO> getAll(){
         return jobRepository.findAll()
                 .stream()
@@ -40,6 +41,7 @@ public class JobService {
         job.setDescription(request.description());
         job.setClient(clientRepository.findByEmail(currentClient).orElseThrow(() -> new ConflictException("wrong email")));
         jobRepository.save(job);
+//        emailSenderService.sendEmail(System.getenv("MAIL_USERNAME"), String.format("New job request - %s", job.getTitle()), String.format("New job request from %s.\n\nTitle: %s\n%s", job.getClient().getEmail(), job.getTitle(), job.getDescription()));
         return new JobDTO(job.getId(), job.getTitle(), job.getDescription(), job.getStatus(), job.getPrice(), clientDTOMapper.apply(job.getClient()));
     }
 
@@ -71,6 +73,10 @@ public class JobService {
             Job job = jobRepository.getById(id);
             if (job.getStatus() == Status.REQUESTED) {
                 job.setStatus(Status.ACCEPTED);
+//                emailSenderService.sendEmail(System.getenv(job.getClient().getEmail()),
+//                        String.format("Accepted job request - %s", job.getTitle()),
+//                        String.format("Your job request was accepted.\n\nTitle: %s\n%s",
+//                                job.getTitle(), job.getDescription()));
                 return jobDTOMapper.apply(jobRepository.save(job));
             }
             return null;
@@ -84,6 +90,10 @@ public class JobService {
             Job job = jobRepository.getById(id);
             if (job.getStatus() == Status.ACCEPTED) {
                 job.setStatus(Status.FINISHED);
+//                emailSenderService.sendEmail(System.getenv(job.getClient().getEmail()),
+//                        String.format("Finished job request - %s", job.getTitle()),
+//                        String.format("Your job request was finished.\n\nPrice: %.2f",
+//                                job.getPrice()));
                 return jobDTOMapper.apply(jobRepository.save(job));
             }
             return null;
@@ -98,14 +108,16 @@ public class JobService {
             if(job.getStatus() == Status.REQUESTED){
                 jobRepository.delete(job);
                 return null;
-            } else if (job.getStatus()==Status.ACCEPTED) {
-                //TODO send notification to approve
-                return null;
+            } else {
+                throw new ConflictException("job request cannot be deleted.");
             }
+//            else if (job.getStatus()==Status.ACCEPTED) {
+//                //TODO send notification to approve
+//                return null;
+//            }
         } else {
             throw new ConflictException("conflict client");
         }
-        return null;
     }
 
     public JobDTO update(Long id, JobRequest request, String currentClient) {
@@ -120,8 +132,17 @@ public class JobService {
                 }
                 return jobDTOMapper.apply(jobRepository.save(job));
             } else if (job.getStatus() == Status.ACCEPTED) {
-                //TODO
-                return null;
+                if (request.description() != null) {
+                    job.setDescription(request.description());
+                }
+                if (request.title() != null) {
+                    job.setTitle(request.title());
+                }
+//                emailSenderService.sendEmail(System.getenv(System.getenv("MAIL_USERNAME")),
+//                        String.format("Updated job request - %s", job.getTitle()),
+//                        String.format("Job request %s was updated.\n\nDescription: %s",
+//                                job.getTitle(), job.getDescription()));
+                return jobDTOMapper.apply(jobRepository.save(job));
             }
         } else {
             throw new ConflictException("conflict");

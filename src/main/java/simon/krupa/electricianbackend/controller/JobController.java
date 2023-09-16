@@ -31,13 +31,13 @@ public class JobController {
     }
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<JobDTO> getById(@PathVariable("id") Long id) {
         return new ResponseEntity<>(jobService.getById(id), HttpStatus.OK);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<JobDTO> createJobRequest(@RequestBody JobRequest request, @AuthenticationPrincipal UserDetails userDetails) {
         return new ResponseEntity<>(jobService.createJobRequest(request, userDetails.getUsername()), HttpStatus.CREATED);
     }
