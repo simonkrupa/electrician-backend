@@ -1,1 +1,1 @@
-security.jwt.token.secret-key: 4ba41f1ff78eb52fed0f83f0cb28ab651ae980539f36dc33b3a0aaec7a1c358c
+security.jwt.token.secret-key: ${JWT_SECRET_KEY}
