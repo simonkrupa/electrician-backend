@@ -54,10 +54,6 @@ public class ClientController {
         return new ResponseEntity<>(clientService.authenticateClient(request), HttpStatus.OK);
     }
 
-//    @PostMapping(path = "/register/admin", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<ClientRegistrationDTO> createAdmin(@RequestBody ClientRegistrationRequest request) {
-//        return new ResponseEntity<>(clientService.createAdmin(request), HttpStatus.CREATED);
-//    }
 
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ClientDTO> update(@RequestBody ClientRequest request, @PathVariable Long id, @AuthenticationPrincipal UserDetails currentUser){

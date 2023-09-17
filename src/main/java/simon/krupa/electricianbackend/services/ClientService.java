@@ -16,6 +16,7 @@ import simon.krupa.electricianbackend.domain.request.ClientRegistrationRequest;
 import simon.krupa.electricianbackend.domain.dto.ClientAuthenticationDTO;
 import simon.krupa.electricianbackend.domain.dto.ClientRegistrationDTO;
 import simon.krupa.electricianbackend.domain.request.ClientRequest;
+import simon.krupa.electricianbackend.exception.BadRequestException;
 import simon.krupa.electricianbackend.exception.ConflictException;
 import simon.krupa.electricianbackend.exception.ResourceNotFoundException;
 import simon.krupa.electricianbackend.repositories.ClientRepository;
@@ -49,37 +50,50 @@ public class ClientService {
     }
 
     public ClientDTO getClientById(Long id){
-        return clientRepository.selectClientById(id)
-                .map(clientDTOMapper)
-                .orElseThrow(() -> new ResourceNotFoundException("client with id [%s] not found".formatted(id)
-                ));
-    }
-
-    public void deleteClient(Long id){
-        Client client = clientRepository.selectClientById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("client with id [%s] not found".formatted(id)
-                ));
-        clientRepository.delete(client);
-    }
-
-    public ClientRegistrationDTO createClient(ClientRegistrationRequest body) {
-        if(!this.clientRepository.isEmailUsed(body.email()).isPresent() && isValidPhoneNumber(body.phoneNumber())) {
-            Client client = new Client(
-                    body.firstName(),
-                    body.lastName(),
-                    body.email(),
-                    passwordEncoder.encode(body.password()),
-                    body.phoneNumber(),
-                    Role.ROLE_USER);
-            clientRepository.save(client);
-            var jwtToken = jwtService.generateToken(client);
-            return new ClientRegistrationDTO(client.getId(), client.getFirstName(), client.getLastName(),
-                    client.getEmail(), client.getPhoneNumber(), jwtToken);
-        } else {
-            throw new ConflictException("email [%s] already registered or phone number not in correct format".formatted(body.email()));
+        try {
+            return clientDTOMapper.apply(clientRepository.getById(id));
+        } catch (Exception e){
+            throw new ResourceNotFoundException(String.format("no client with this %d", id));
         }
     }
 
+    public void deleteClient(Long id){
+        boolean exists = clientRepository.existsById(id);
+        if(!exists){
+            throw new ResourceNotFoundException(String.format("no client with this id %d", id));
+        }
+        clientRepository.deleteById(id);
+    }
+
+    public ClientRegistrationDTO createClient(ClientRegistrationRequest body) {
+        try {
+            if (this.clientRepository.isEmailUsed(body.email()).isEmpty()) {
+                if (isValidPhoneNumber(body.phoneNumber())) {
+                    Client client = new Client(
+                            body.firstName(),
+                            body.lastName(),
+                            body.email(),
+                            passwordEncoder.encode(body.password()),
+                            body.phoneNumber(),
+                            Role.ROLE_USER);
+                    clientRepository.save(client);
+                    var jwtToken = jwtService.generateToken(client);
+                    return new ClientRegistrationDTO(client.getId(), client.getFirstName(),
+                            client.getLastName(), client.getEmail(), client.getPhoneNumber(),
+                            jwtToken);
+                } else {
+                    throw new BadRequestException("Bad request");
+                }
+            } else {
+                throw new ConflictException(("email [%s] already registered or " +
+                        "phone number not in correct format").formatted(body.email()));
+            }
+        } catch (Exception e){
+            throw new BadRequestException("Bad request");
+        }
+    }
+
+    //TODO
     public ClientAuthenticationDTO authenticateClient(ClientAuthenticationRequest body){
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -93,46 +107,36 @@ public class ClientService {
         return new ClientAuthenticationDTO(jwtToken);
     }
 
-    public ClientRegistrationDTO createAdmin(ClientRegistrationRequest body) {
-        if(!this.clientRepository.isEmailUsed(body.email()).isPresent()) {
-            Client client = new Client(
-                    body.firstName(),
-                    body.lastName(),
-                    body.email(),
-                    passwordEncoder.encode(body.password()),
-                    body.phoneNumber(),
-                    Role.ROLE_ADMIN);
-            clientRepository.save(client);
-            var jwtToken = jwtService.generateToken(client);
-            return new ClientRegistrationDTO(client.getId(), client.getFirstName(), client.getLastName(),
-                    client.getEmail(), client.getPhoneNumber(), jwtToken);
-        } else {
-            throw new ConflictException("email [%s] already registered".formatted(body.email()));
-        }
-    }
-
     public ClientDTO update(ClientRequest request, Long id, UserDetails currentUser) {
-        Client client = clientRepository.getById(id);
-        if(currentUser.getUsername().equals(client.getEmail())){
-            if (request.email() != null){
-                client.setEmail(request.email());
-            }
-            if (request.firstName() != null){
-                client.setFirstName(request.firstName());
-            }
-            if (request.lastName() != null){
-                client.setLastName(request.lastName());
-            }
-            if (request.phoneNumber() != null){
-                if (isValidPhoneNumber(request.phoneNumber())) {
-                    client.setPhoneNumber(request.phoneNumber());
-                } else {
-                    throw new ConflictException("Wrong number format");
+        try {
+            Client client = clientRepository.getById(id);
+            if (currentUser.getUsername().equals(client.getEmail())) {
+                try {
+                    if (request.email() != null) {
+                        client.setEmail(request.email());
+                    }
+                    if (request.firstName() != null) {
+                        client.setFirstName(request.firstName());
+                    }
+                    if (request.lastName() != null) {
+                        client.setLastName(request.lastName());
+                    }
+                    if (request.phoneNumber() != null) {
+                        if (isValidPhoneNumber(request.phoneNumber())) {
+                            client.setPhoneNumber(request.phoneNumber());
+                        } else {
+                            throw new ConflictException("Wrong number format");
+                        }
+                    }
+                    return clientDTOMapper.apply(clientRepository.save(client));
+                } catch (Exception e) {
+                    throw new BadRequestException("Bad request");
                 }
+            } else {
+                throw new BadRequestException("No correct client");
             }
-            return clientDTOMapper.apply(clientRepository.save(client));
-        } else {
-            throw new ResourceNotFoundException("No correct client");
+        } catch (Exception e){
+            throw new BadRequestException("Bad request");
         }
     }
 }
