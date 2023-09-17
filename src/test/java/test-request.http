@@ -7,13 +7,64 @@ GET http://localhost:8080/api/home
 %}
 
 ###
+POST http://localhost:8080/api/client/authenticate
+Content-Type: application/json
+
+{
+  "email": "simon.kwrupa@icloud.com",
+  "password": "heslo"
+}
+
+> {%
+    client.test("Bad request", function() {
+        client.assert(response.status === 403, "Response status is not 400");
+    });
+%}
+
+###
+POST http://localhost:8080/api/client/authenticate
+Content-Type: application/json
+
+{
+  "email": "simon.krupa@icloud.com",
+  "password": "heslo"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+    client.global.set("auth-code-admin", response.body.token);
+%}
+###
+GET http://localhost:8080/api/client
+Content-Type: application/json
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 403, "Response status is not 403");
+    });
+%}
+
+###
+GET http://localhost:8080/api/client
+Content-Type: application/json
+Authorization: Bearer {{auth-code-admin}}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
 POST http://localhost:8080/api/client/register
 Content-Type: application/json
 
 {
 "firstName": "jozef",
 "lastName": "pan",
-"email": "jozef.pannn@example.com",
+"email": "jozef.pan@example.com",
 "phoneNumber": "0924550565",
 "password": "heslo"
 }
@@ -22,26 +73,130 @@ Content-Type: application/json
     client.test("Request executed successfully", function() {
         client.assert(response.status === 201, "Response status is not 201");
     });
+    client.global.set("auth-code-user", response.body.token);
+    client.global.set("user-client-id", response.body.id);
+%}
+
+###
+POST http://localhost:8080/api/client/register
+Content-Type: application/json
+
+{
+"firstName": "jozef",
+"lastName": "pan",
+"email": "jozef.pan@example.com",
+"phoneNumber": "0924550565",
+"password": "heslo"
+}
+
+> {%
+    client.test("Bad request same email", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+%}
+
+###
+POST http://localhost:8080/api/client/register
+Content-Type: application/json
+
+{
+  "firstName": "jozef",
+  "lastName": "pan"
+}
+
+> {%
+    client.test("Bad request wrong request data", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
 %}
 
 ###
 
-GET http://localhost:8080/api/review/2560
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6W3siYXV0aG9yaXR5IjoiUk9MRV9BRE1JTiJ9XSwic3ViIjoic2ltb24ua3J1cGFAaWNsb3VkLmNvbSIsImlhdCI6MTY5NDg5NDMyMCwiZXhwIjoxNjk0ODk1NzYwfQ.Pfu1yX_d_QeSXzTWuIRj_ea_EvsY34yzmiWbq2TPQHE
+GET http://localhost:8080/api/client/5065065
+Content-Type: application/json
+Authorization: Bearer {{auth-code-admin}}
 
 > {%
-    client.test("Not found successfully", function() {
+    client.test("Not found", function() {
         client.assert(response.status === 404, "Response status is not 404");
     });
 %}
 
+###
+GET http://localhost:8080/api/client/{{user-client-id}}
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
 
 ###
-POST http://localhost:8080/api/client/authenticate
+PUT http://localhost:8080/api/client/{{user-client-id}}
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+{
+  "firstName": "bb",
+  "lastName": "aa"
+}
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+PUT http://localhost:8080/api/client/{{user-client-id}}
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+{
+  "firstName": "bbdd",
+  "lastName": "aa",
+  "email": "jozef.pan@example.com",
+  "phoneNumber": "0924550545"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+DELETE http://localhost:8080/api/client/5651665
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+> {%
+    client.test("Bad request", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+%}
+
+###
+DELETE http://localhost:8080/api/client/{{user-client-id}}
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+> {%
+    client.test("No content", function() {
+        client.assert(response.status === 204, "Response status is not 204");
+    });
+%}
+
+###
+POST http://localhost:8080/api/client/register
 Content-Type: application/json
 
 {
-  "email": "f@icloud.com",
+  "firstName": "jozef",
+  "lastName": "pan",
+  "email": "jozef.pan@example.com",
+  "phoneNumber": "0924550565",
   "password": "heslo"
 }
 
@@ -49,48 +204,332 @@ Content-Type: application/json
     client.test("Request executed successfully", function() {
         client.assert(response.status === 201, "Response status is not 201");
     });
+    client.global.set("auth-code-user", response.body.token);
+    client.global.set("user-client-id", response.body.id);
+%}
+
+
+###
+POST http://localhost:8080/api/job
+Content-Type: application/json
+
+{
+  "title": "asda",
+  "description": "vvsvsvs"
+}
+
+> {%
+    client.test("Forbidden", function() {
+        client.assert(response.status === 403, "Response status is not 403");
+    });
+%}
+
+###
+POST http://localhost:8080/api/job
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+{
+  "title": "asda",
+  "description": "vvsvsvs"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+    client.global.set("job-id", response.body.id);
+%}
+
+###
+GET http://localhost:8080/api/job
+Content-Type: application/json
+Authorization: Bearer {{auth-code-admin}}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+GET http://localhost:8080/api/job/{{job-id}}
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+
+###
+GET http://localhost:8080/api/job/5199156
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+> {%
+    client.test("Not found", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+%}
+
+###
+GET http://localhost:8080/api/job/requested
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+> {%
+    client.test("Forbidden", function() {
+        client.assert(response.status === 403, "Response status is not 403");
+    });
+%}
+
+###
+GET http://localhost:8080/api/job/requested
+Content-Type: application/json
+Authorization: Bearer {{auth-code-admin}}
+
+> {%
+    client.test("Forbidden", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+DELETE http://localhost:8080/api/job/8165565
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+> {%
+    client.test("Not found", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+%}
+
+###
+DELETE http://localhost:8080/api/job/{{job-id}}
+Content-Type: application/json
+
+> {%
+    client.test("Forbidden", function() {
+        client.assert(response.status === 403, "Response status is not 403");
+    });
+%}
+
+###
+DELETE http://localhost:8080/api/job/{{job-id}}
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+> {%
+    client.test("Success", function() {
+        client.assert(response.status === 204, "Response status is not 204");
+    });
+%}
+
+###
+POST http://localhost:8080/api/job
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+{
+  "title": "asda",
+  "description": "vvsvsvs"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+    client.global.set("job-id", response.body.id);
+%}
+
+###
+PUT http://localhost:8080/api/job/{{job-id}}
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+{
+  "title": "asda",
+  "description": "vvsvseeevs"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+PUT http://localhost:8080/api/job/finish/{{job-id}}
+Content-Type: application/json
+Authorization: Bearer {{auth-code-admin}}
+
+> {%
+    client.test("Bad request", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+%}
+
+###
+PUT http://localhost:8080/api/job/accept/{{job-id}}
+Content-Type: application/json
+Authorization: Bearer {{auth-code-admin}}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+PUT http://localhost:8080/api/job/finish/{{job-id}}
+Content-Type: application/json
+Authorization: Bearer {{auth-code-admin}}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+GET http://localhost:8080/api/review
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+> {%
+    client.test("Success", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+GET http://localhost:8080/api/review
+Content-Type: application/json
+
+> {%
+    client.test("Success", function() {
+        client.assert(response.status === 403, "Response status is not 403");
+    });
 %}
 
 ###
 POST http://localhost:8080/api/review
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6W3siYXV0aG9yaXR5IjoiUk9MRV9VU0VSIn1dLCJzdWIiOiJmQGljbG91ZC5jb20iLCJpYXQiOjE2OTQ4OTQ5MTAsImV4cCI6MTY5NDg5NjM1MH0.EShoVa_RjaGCBtucnKzdfBQR6tqa8VnrZG6Kyji1CWE
+Authorization: Bearer {{auth-code-user}}
 
 {
-  "email": "f@icloud.com",
-  "password": "heslo"
+  "stars": 4,
+  "description": "dadwa",
+  "jobId": {{job-id}}
 }
 
 > {%
-    client.test("Request executed successfully", function() {
-        client.assert(response.status === 400, "Response status is not 201");
+    client.test("Success", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+    client.global.set("review-id", response.body.id);
+%}
+
+###
+POST http://localhost:8080/api/review
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+{
+  "stars": 6,
+  "description": "dadwa",
+  "jobId": {{job-id}}
+}
+
+> {%
+    client.test("Bad request", function() {
+        client.assert(response.status === 400, "Response status is not 400");
     });
 %}
 
 ###
-PUT http://localhost:8080/api/review/
+POST http://localhost:8080/api/review
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6W3siYXV0aG9yaXR5IjoiUk9MRV9VU0VSIn1dLCJzdWIiOiJmQGljbG91ZC5jb20iLCJpYXQiOjE2OTQ4OTQ5MTAsImV4cCI6MTY5NDg5NjM1MH0.EShoVa_RjaGCBtucnKzdfBQR6tqa8VnrZG6Kyji1CWE
+Authorization: Bearer {{auth-code-user}}
 
 {
-  "email": "f@icloud.com",
-  "password": "heslo"
+  "stars": 6,
+  "description": "dadwa",
+  "jobId": 56165
 }
 
 > {%
-    client.test("Request executed successfully", function() {
-        client.assert(response.status === 400, "Response status is not 201");
+    client.test("Bad request", function() {
+        client.assert(response.status === 400, "Response status is not 400");
     });
 %}
 
 ###
-GET http://localhost:8080/api/client/31555
+GET http://localhost:8080/api/review/{{review-id}}
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6W3siYXV0aG9yaXR5IjoiUk9MRV9VU0VSIn1dLCJzdWIiOiJmQGljbG91ZC5jb20iLCJpYXQiOjE2OTQ4OTY1NDEsImV4cCI6MTY5NDg5Nzk4MX0.PMMwO8J325yR7PG-jUnH0HQp1cyZkYn5hPcC1Lvc738
-
+Authorization: Bearer {{auth-code-user}}
 
 > {%
-    client.test("Request executed successfully", function() {
-        client.assert(response.status === 200, "Response status is not 201");
+    client.test("Success", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+PUT http://localhost:8080/api/review/{{review-id}}
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+{
+  "stars": 2,
+  "description": "addadsada"
+}
+
+> {%
+    client.test("Success", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+PUT http://localhost:8080/api/review/555555
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+{
+  "stars": 2,
+  "description": "addadsada"
+}
+
+> {%
+    client.test("Not found", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+%}
+
+
+###
+DELETE http://localhost:8080/api/review/{{review-id}}
+Content-Type: application/json
+Authorization: Bearer {{auth-code-admin}}
+
+> {%
+    client.test("Not allowed", function() {
+        client.assert(response.status === 403, "Response status is not 403");
+    });
+%}
+
+###
+DELETE http://localhost:8080/api/review/{{review-id}}
+Content-Type: application/json
+Authorization: Bearer {{auth-code-user}}
+
+> {%
+    client.test("No content", function() {
+        client.assert(response.status === 204, "Response status is not 204");
     });
 %}
