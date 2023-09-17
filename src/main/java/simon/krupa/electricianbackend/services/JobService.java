@@ -84,8 +84,9 @@ public class JobService {
 //                        String.format("Your job request was accepted.\n\nTitle: %s\n%s",
 //                                job.getTitle(), job.getDescription()));
                 return jobDTOMapper.apply(jobRepository.save(job));
+            } else {
+                throw new BadRequestException("Bad request");
             }
-            return null;
         } catch (Exception e){
             throw new ResourceNotFoundException(String.format("Not correct id %d", id));
         }
@@ -101,8 +102,9 @@ public class JobService {
 //                        String.format("Your job request was finished.\n\nPrice: %.2f",
 //                                job.getPrice()));
                 return jobDTOMapper.apply(jobRepository.save(job));
+            } else {
+                throw new BadRequestException("Bad request");
             }
-            return null;
         } catch (Exception e){
             throw new ResourceNotFoundException(String.format("Not correct id %d", id));
         }

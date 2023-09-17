@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import simon.krupa.electricianbackend.domain.Job;
 import simon.krupa.electricianbackend.domain.Review;
 import simon.krupa.electricianbackend.domain.dto.ReviewDTO;
+import simon.krupa.electricianbackend.domain.dto.mapper.JobDTOMapper;
 import simon.krupa.electricianbackend.domain.dto.mapper.ReviewDTOMapper;
 import simon.krupa.electricianbackend.domain.request.ReviewRequest;
 import simon.krupa.electricianbackend.exception.BadRequestException;
@@ -13,6 +14,7 @@ import simon.krupa.electricianbackend.exception.ResourceNotFoundException;
 import simon.krupa.electricianbackend.repositories.JobRepository;
 import simon.krupa.electricianbackend.repositories.ReviewRepository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +25,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final ReviewDTOMapper reviewDTOMapper;
     private final JobRepository jobRepository;
+    private final JobDTOMapper jobDTOMapper;
 
     public List<ReviewDTO> getAll(){
         return reviewRepository.findAll()
@@ -55,7 +58,10 @@ public class ReviewService {
                 review.setStars(request.stars());
                 review.setDescription(request.description());
                 review.setJob(job);
-                return reviewDTOMapper.apply(reviewRepository.save(review));
+                review.setCreationDate(new Date());
+                reviewRepository.save(review);
+                ReviewDTO reviewDTO = new ReviewDTO(review.getId(), review.getStars(),review.getCreationDate(), review.getDescription(), jobDTOMapper.apply(review.getJob()));
+                return reviewDTO;
             } else {
                 throw new BadRequestException("Bad request");
             }
@@ -66,9 +72,9 @@ public class ReviewService {
 
     public ReviewDTO updateReview(Long id, ReviewRequest request, String currentClient) {
         try {
-            Job job = jobRepository.getById(request.jobId());
-            if (job.getClient().getEmail().equals(currentClient) && reviewRepository.existsById(id)) {
-                Review review = reviewRepository.getById(id);
+            Review review = reviewRepository.getById(id);
+            Job job = jobRepository.getById(review.getJob().getId());
+            if (job.getClient().getEmail().equals(currentClient)) {
                 try {
                     if (request.description() != null) {
                         review.setDescription(request.description());

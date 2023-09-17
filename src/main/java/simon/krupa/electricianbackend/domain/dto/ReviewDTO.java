@@ -9,6 +9,6 @@ public record ReviewDTO (
         Integer stars,
         Date creationDate,
         String description,
-        Job job
+        JobDTO job
 ) {
 }

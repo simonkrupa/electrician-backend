@@ -18,18 +18,18 @@ public class ElectricianBackendApplication {
     }
 
 
-//    @Component
-//    public class CommandLineAppStartupRunner implements CommandLineRunner {
-//        @Autowired
-//        ClientRepository clientRepository;
-//
-//        @Autowired
-//        PasswordEncoder passwordEncoder;
-//
-//        @Override
-//        public void run(String...args) throws Exception {
-//            Client admin = new Client("simon", "krupa", "simon.krupa@icloud.com", passwordEncoder.encode("heslo"), "090", Role.ROLE_ADMIN);
-//            clientRepository.save(admin);
-//        }
-//    }
+    @Component
+    public class CommandLineAppStartupRunner implements CommandLineRunner {
+        @Autowired
+        ClientRepository clientRepository;
+
+        @Autowired
+        PasswordEncoder passwordEncoder;
+
+        @Override
+        public void run(String...args) throws Exception {
+            Client admin = new Client("simon", "krupa", "simon.krupa@icloud.com", passwordEncoder.encode("heslo"), "090", Role.ROLE_ADMIN);
+            clientRepository.save(admin);
+        }
+    }
 }
