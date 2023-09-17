@@ -1,0 +1,96 @@
+GET http://localhost:8080/api/home
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+POST http://localhost:8080/api/client/register
+Content-Type: application/json
+
+{
+"firstName": "jozef",
+"lastName": "pan",
+"email": "jozef.pannn@example.com",
+"phoneNumber": "0924550565",
+"password": "heslo"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+%}
+
+###
+
+GET http://localhost:8080/api/review/2560
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6W3siYXV0aG9yaXR5IjoiUk9MRV9BRE1JTiJ9XSwic3ViIjoic2ltb24ua3J1cGFAaWNsb3VkLmNvbSIsImlhdCI6MTY5NDg5NDMyMCwiZXhwIjoxNjk0ODk1NzYwfQ.Pfu1yX_d_QeSXzTWuIRj_ea_EvsY34yzmiWbq2TPQHE
+
+> {%
+    client.test("Not found successfully", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+%}
+
+
+###
+POST http://localhost:8080/api/client/authenticate
+Content-Type: application/json
+
+{
+  "email": "f@icloud.com",
+  "password": "heslo"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+%}
+
+###
+POST http://localhost:8080/api/review
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6W3siYXV0aG9yaXR5IjoiUk9MRV9VU0VSIn1dLCJzdWIiOiJmQGljbG91ZC5jb20iLCJpYXQiOjE2OTQ4OTQ5MTAsImV4cCI6MTY5NDg5NjM1MH0.EShoVa_RjaGCBtucnKzdfBQR6tqa8VnrZG6Kyji1CWE
+
+{
+  "email": "f@icloud.com",
+  "password": "heslo"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 201");
+    });
+%}
+
+###
+PUT http://localhost:8080/api/review/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6W3siYXV0aG9yaXR5IjoiUk9MRV9VU0VSIn1dLCJzdWIiOiJmQGljbG91ZC5jb20iLCJpYXQiOjE2OTQ4OTQ5MTAsImV4cCI6MTY5NDg5NjM1MH0.EShoVa_RjaGCBtucnKzdfBQR6tqa8VnrZG6Kyji1CWE
+
+{
+  "email": "f@icloud.com",
+  "password": "heslo"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 201");
+    });
+%}
+
+###
+GET http://localhost:8080/api/client/31555
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6W3siYXV0aG9yaXR5IjoiUk9MRV9VU0VSIn1dLCJzdWIiOiJmQGljbG91ZC5jb20iLCJpYXQiOjE2OTQ4OTY1NDEsImV4cCI6MTY5NDg5Nzk4MX0.PMMwO8J325yR7PG-jUnH0HQp1cyZkYn5hPcC1Lvc738
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 201");
+    });
+%}

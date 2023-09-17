@@ -11,6 +11,7 @@ import simon.krupa.electricianbackend.domain.dto.JobDTO;
 import simon.krupa.electricianbackend.domain.dto.mapper.ClientDTOMapper;
 import simon.krupa.electricianbackend.domain.dto.mapper.JobDTOMapper;
 import simon.krupa.electricianbackend.domain.request.JobRequest;
+import simon.krupa.electricianbackend.exception.BadRequestException;
 import simon.krupa.electricianbackend.exception.ConflictException;
 import simon.krupa.electricianbackend.exception.ResourceNotFoundException;
 import simon.krupa.electricianbackend.repositories.ClientRepository;
@@ -28,6 +29,7 @@ public class JobService {
     private final JobDTOMapper jobDTOMapper;
     private final ClientDTOMapper clientDTOMapper;
 //    private final EmailSenderService emailSenderService;
+
     public List<JobDTO> getAll(){
         return jobRepository.findAll()
                 .stream()
@@ -36,13 +38,17 @@ public class JobService {
     }
 
     public JobDTO createJobRequest(JobRequest request, String currentClient) {
-        Job job = new Job();
-        job.setTitle(request.title());
-        job.setDescription(request.description());
-        job.setClient(clientRepository.findByEmail(currentClient).orElseThrow(() -> new ConflictException("wrong email")));
-        jobRepository.save(job);
+        try {
+            Job job = new Job();
+            job.setTitle(request.title());
+            job.setDescription(request.description());
+            job.setClient(clientRepository.findByEmail(currentClient).orElseThrow(() -> new ConflictException("wrong email")));
+            jobRepository.save(job);
 //        emailSenderService.sendEmail(System.getenv("MAIL_USERNAME"), String.format("New job request - %s", job.getTitle()), String.format("New job request from %s.\n\nTitle: %s\n%s", job.getClient().getEmail(), job.getTitle(), job.getDescription()));
-        return new JobDTO(job.getId(), job.getTitle(), job.getDescription(), job.getStatus(), job.getPrice(), clientDTOMapper.apply(job.getClient()));
+            return new JobDTO(job.getId(), job.getTitle(), job.getDescription(), job.getStatus(), job.getPrice(), clientDTOMapper.apply(job.getClient()));
+        } catch (Exception e) {
+            throw new BadRequestException("Bad request");
+        }
     }
 
     public List<JobDTO> getAllRequestedJobs() {
@@ -56,7 +62,7 @@ public class JobService {
         try {
             return jobDTOMapper.apply(jobRepository.getById(id));
         } catch (Exception e){
-            throw new ResourceNotFoundException("no job with this id");
+            throw new ResourceNotFoundException(String.format("no job with this %d", id));
         }
     }
 
@@ -81,7 +87,7 @@ public class JobService {
             }
             return null;
         } catch (Exception e){
-            throw new ResourceNotFoundException("wrong");
+            throw new ResourceNotFoundException(String.format("Not correct id %d", id));
         }
     }
 
@@ -98,54 +104,63 @@ public class JobService {
             }
             return null;
         } catch (Exception e){
-            throw new ResourceNotFoundException("wrong");
+            throw new ResourceNotFoundException(String.format("Not correct id %d", id));
         }
     }
 
     public void deleteJobRequest(Long id, String currentClient) {
-        Job job = jobRepository.getById(id);
-        if (currentClient.equals(job.getClient().getEmail())){
-            if(job.getStatus() == Status.REQUESTED){
-                jobRepository.delete(job);
-            } else {
-                throw new ConflictException("job request cannot be deleted.");
-            }
+        try {
+            Job job = jobRepository.getById(id);
+            if (currentClient.equals(job.getClient().getEmail())) {
+                if (job.getStatus() == Status.REQUESTED) {
+                    jobRepository.delete(job);
+                } else {
+                    throw new ConflictException("job request cannot be deleted.");
+                }
 //            else if (job.getStatus()==Status.ACCEPTED) {
 //                //TODO send notification to approve
 //                return null;
 //            }
-        } else {
-            throw new ConflictException("conflict client");
+            } else {
+                throw new ConflictException("Not correct client");
+            }
+        } catch (Exception e) {
+            throw new ResourceNotFoundException(String.format("No resource with this id %d", id));
         }
     }
 
     public JobDTO update(Long id, JobRequest request, String currentClient) {
-        Job job = jobRepository.getById(id);
-        if(job.getClient().getEmail().equals(currentClient)){
-            if (job.getStatus() == Status.REQUESTED) {
-                if (request.description() != null) {
-                    job.setDescription(request.description());
-                }
-                if (request.title() != null) {
-                    job.setTitle(request.title());
-                }
-                return jobDTOMapper.apply(jobRepository.save(job));
-            } else if (job.getStatus() == Status.ACCEPTED) {
-                if (request.description() != null) {
-                    job.setDescription(request.description());
-                }
-                if (request.title() != null) {
-                    job.setTitle(request.title());
-                }
+        try {
+            Job job = jobRepository.getById(id);
+            if (job.getClient().getEmail().equals(currentClient)) {
+                if (job.getStatus() == Status.REQUESTED) {
+                    if (request.description() != null) {
+                        job.setDescription(request.description());
+                    }
+                    if (request.title() != null) {
+                        job.setTitle(request.title());
+                    }
+                    return jobDTOMapper.apply(jobRepository.save(job));
+                } else if (job.getStatus() == Status.ACCEPTED) {
+                    if (request.description() != null) {
+                        job.setDescription(request.description());
+                    }
+                    if (request.title() != null) {
+                        job.setTitle(request.title());
+                    }
 //                emailSenderService.sendEmail(System.getenv(System.getenv("MAIL_USERNAME")),
 //                        String.format("Updated job request - %s", job.getTitle()),
 //                        String.format("Job request %s was updated.\n\nDescription: %s",
 //                                job.getTitle(), job.getDescription()));
-                return jobDTOMapper.apply(jobRepository.save(job));
+                    return jobDTOMapper.apply(jobRepository.save(job));
+                } else {
+                    throw new BadRequestException("Bad request, job finished");
+                }
+            } else {
+                throw new ConflictException("Not correct client");
             }
-        } else {
-            throw new ConflictException("conflict");
+        } catch (Exception e) {
+            throw new BadRequestException("Bad request");
         }
-        return null;
     }
 }
