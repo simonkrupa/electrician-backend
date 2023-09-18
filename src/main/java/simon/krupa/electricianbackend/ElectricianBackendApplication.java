@@ -28,7 +28,7 @@ public class ElectricianBackendApplication {
 
         @Override
         public void run(String...args) throws Exception {
-            Client admin = new Client("simon", "krupa", "simon.krupa@icloud.com", passwordEncoder.encode("heslo"), "090", Role.ROLE_ADMIN);
+            Client admin = new Client("simon", "krupa", System.getenv("MAIL_ADMIN"), passwordEncoder.encode(System.getenv("MAIL_PASSWORD")), "0904550455", Role.ROLE_ADMIN);
             clientRepository.save(admin);
         }
     }
